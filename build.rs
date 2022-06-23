@@ -23,6 +23,8 @@ fn generate_bindings(alsa_library: &pkg_config::Library) {
     use std::env;
     use std::path::PathBuf;
 
+    println!("cargo:rerun-if-changed=wrapper.h");
+
     let clang_include_args = alsa_library.include_paths.iter().map(|include_path| {
         format!(
             "-I{}",
