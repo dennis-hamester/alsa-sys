@@ -14,7 +14,7 @@ fn main() {
         Ok(_alsa_library) => {
             #[cfg(feature = "use-bindgen")]
             generate_bindings(&_alsa_library);
-        } 
+        }
     };
 }
 
