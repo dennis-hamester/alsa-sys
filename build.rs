@@ -45,6 +45,7 @@ fn generate_bindings(alsa_library: &pkg_config::Library) {
         .with_codegen_config(codegen_config)
         .clang_args(clang_include_args)
         .header("wrapper.h")
+        .clang_arg("-fretain-comments-from-system-headers")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks));
     let bindings = builder.generate().expect("Unable to generate bindings");
 
