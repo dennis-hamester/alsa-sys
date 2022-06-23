@@ -237,6 +237,17 @@ pub const SND_SEQ_REMOVE_TIME_TICK: u32 = 64;
 pub const SND_SEQ_REMOVE_EVENT_TYPE: u32 = 128;
 pub const SND_SEQ_REMOVE_IGNORE_OFF: u32 = 256;
 pub const SND_SEQ_REMOVE_TAG_MATCH: u32 = 512;
+pub const SND_PCM_IOPLUG_FLAG_LISTED: u32 = 1;
+pub const SND_PCM_IOPLUG_FLAG_MONOTONIC: u32 = 2;
+pub const SND_PCM_IOPLUG_FLAG_BOUNDARY_WA: u32 = 4;
+pub const SND_PCM_IOPLUG_VERSION_MAJOR: u32 = 1;
+pub const SND_PCM_IOPLUG_VERSION_MINOR: u32 = 0;
+pub const SND_PCM_IOPLUG_VERSION_TINY: u32 = 2;
+pub const SND_PCM_IOPLUG_VERSION: u32 = 65538;
+pub const SND_PCM_EXTPLUG_VERSION_MAJOR: u32 = 1;
+pub const SND_PCM_EXTPLUG_VERSION_MINOR: u32 = 0;
+pub const SND_PCM_EXTPLUG_VERSION_TINY: u32 = 2;
+pub const SND_PCM_EXTPLUG_VERSION: u32 = 65538;
 pub type va_list = __builtin_va_list;
 pub type __gnuc_va_list = __builtin_va_list;
 extern "C" {
@@ -9074,6 +9085,410 @@ extern "C" {
         count: ::std::os::raw::c_long,
         ev: *const snd_seq_event_t,
     ) -> ::std::os::raw::c_long;
+}
+#[doc = "< access type"]
+pub const SND_PCM_IOPLUG_HW_ACCESS: ::std::os::raw::c_uint = 0;
+#[doc = "< format"]
+pub const SND_PCM_IOPLUG_HW_FORMAT: ::std::os::raw::c_uint = 1;
+#[doc = "< channels"]
+pub const SND_PCM_IOPLUG_HW_CHANNELS: ::std::os::raw::c_uint = 2;
+#[doc = "< rate"]
+pub const SND_PCM_IOPLUG_HW_RATE: ::std::os::raw::c_uint = 3;
+#[doc = "< period bytes"]
+pub const SND_PCM_IOPLUG_HW_PERIOD_BYTES: ::std::os::raw::c_uint = 4;
+#[doc = "< buffer bytes"]
+pub const SND_PCM_IOPLUG_HW_BUFFER_BYTES: ::std::os::raw::c_uint = 5;
+#[doc = "< number of periods"]
+pub const SND_PCM_IOPLUG_HW_PERIODS: ::std::os::raw::c_uint = 6;
+#[doc = "< max number of hw constraints"]
+pub const SND_PCM_IOPLUG_HW_PARAMS: ::std::os::raw::c_uint = 7;
+#[doc = " hw constraints for ioplug"]
+pub type _bindgen_ty_7 = ::std::os::raw::c_uint;
+#[doc = " I/O plugin handle"]
+pub type snd_pcm_ioplug_t = snd_pcm_ioplug;
+#[doc = " Callback table of ioplug"]
+pub type snd_pcm_ioplug_callback_t = snd_pcm_ioplug_callback;
+#[doc = " Handle of ioplug"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct snd_pcm_ioplug {
+    #[doc = " protocol version; #SND_PCM_IOPLUG_VERSION must be filled here"]
+    #[doc = " before calling #snd_pcm_ioplug_create()"]
+    pub version: ::std::os::raw::c_uint,
+    #[doc = " name of this plugin; must be filled before calling #snd_pcm_ioplug_create()"]
+    pub name: *const ::std::os::raw::c_char,
+    #[doc = "< SND_PCM_IOPLUG_FLAG_XXX"]
+    pub flags: ::std::os::raw::c_uint,
+    #[doc = "< poll file descriptor"]
+    pub poll_fd: ::std::os::raw::c_int,
+    #[doc = "< poll events"]
+    pub poll_events: ::std::os::raw::c_uint,
+    #[doc = "< pseudo mmap mode"]
+    pub mmap_rw: ::std::os::raw::c_uint,
+    #[doc = " callbacks of this plugin; must be filled before calling #snd_pcm_ioplug_create()"]
+    pub callback: *const snd_pcm_ioplug_callback_t,
+    #[doc = " private data, which can be used freely in the driver callbacks"]
+    pub private_data: *mut ::std::os::raw::c_void,
+    #[doc = " PCM handle filled by #snd_pcm_ioplug_create()"]
+    pub pcm: *mut snd_pcm_t,
+    #[doc = "< stream direcion; read-only"]
+    pub stream: snd_pcm_stream_t,
+    #[doc = "< current PCM state; read-only"]
+    pub state: snd_pcm_state_t,
+    #[doc = "< application pointer; read-only"]
+    pub appl_ptr: snd_pcm_uframes_t,
+    #[doc = "< hw pointer; read-only"]
+    pub hw_ptr: snd_pcm_uframes_t,
+    #[doc = "< non-block mode; read-only"]
+    pub nonblock: ::std::os::raw::c_int,
+    #[doc = "< access type; filled after hw_params is called"]
+    pub access: snd_pcm_access_t,
+    #[doc = "< PCM format; filled after hw_params is called"]
+    pub format: snd_pcm_format_t,
+    #[doc = "< number of channels; filled after hw_params is called"]
+    pub channels: ::std::os::raw::c_uint,
+    #[doc = "< rate; filled after hw_params is called"]
+    pub rate: ::std::os::raw::c_uint,
+    #[doc = "< period size; filled after hw_params is called"]
+    pub period_size: snd_pcm_uframes_t,
+    #[doc = "< buffer size; filled after hw_params is called"]
+    pub buffer_size: snd_pcm_uframes_t,
+}
+#[doc = " Callback table of ioplug"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct snd_pcm_ioplug_callback {
+    #[doc = " start the PCM; required, called inside mutex lock"]
+    pub start: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " stop the PCM; required, called inside mutex lock"]
+    pub stop: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " get the current DMA position; required, called inside mutex lock"]
+    #[doc = " \\return buffer position up to buffer_size or"]
+    #[doc = " when #SND_PCM_IOPLUG_FLAG_BOUNDARY_WA flag is set up to boundary or"]
+    #[doc = " a negative error code for Xrun"]
+    pub pointer:
+        ::std::option::Option<unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> snd_pcm_sframes_t>,
+    #[doc = " transfer the data; optional, called inside mutex lock"]
+    pub transfer: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            areas: *const snd_pcm_channel_area_t,
+            offset: snd_pcm_uframes_t,
+            size: snd_pcm_uframes_t,
+        ) -> snd_pcm_sframes_t,
+    >,
+    #[doc = " close the PCM; optional"]
+    pub close: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " hw_params; optional"]
+    pub hw_params: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            params: *mut snd_pcm_hw_params_t,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " hw_free; optional"]
+    pub hw_free: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " sw_params; optional"]
+    pub sw_params: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            params: *mut snd_pcm_sw_params_t,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " prepare; optional"]
+    pub prepare: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " drain; optional"]
+    pub drain: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " toggle pause; optional, called inside mutex lock"]
+    pub pause: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            enable: ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " resume; optional"]
+    pub resume: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " poll descriptors count; optional"]
+    pub poll_descriptors_count: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " poll descriptors; optional"]
+    pub poll_descriptors: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            pfd: *mut pollfd,
+            space: ::std::os::raw::c_uint,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " mangle poll events; optional"]
+    pub poll_revents: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            pfd: *mut pollfd,
+            nfds: ::std::os::raw::c_uint,
+            revents: *mut ::std::os::raw::c_ushort,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " dump; optional"]
+    pub dump: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t, out: *mut snd_output_t),
+    >,
+    #[doc = " get the delay for the running PCM; optional; since v1.0.1"]
+    pub delay: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            delayp: *mut snd_pcm_sframes_t,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " query the channel maps; optional; since v1.0.2"]
+    pub query_chmaps: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> *mut *mut snd_pcm_chmap_query_t,
+    >,
+    #[doc = " get the channel map; optional; since v1.0.2"]
+    pub get_chmap: ::std::option::Option<
+        unsafe extern "C" fn(io: *mut snd_pcm_ioplug_t) -> *mut snd_pcm_chmap_t,
+    >,
+    #[doc = " set the channel map; optional; since v1.0.2"]
+    pub set_chmap: ::std::option::Option<
+        unsafe extern "C" fn(
+            io: *mut snd_pcm_ioplug_t,
+            map: *const snd_pcm_chmap_t,
+        ) -> ::std::os::raw::c_int,
+    >,
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_create(
+        io: *mut snd_pcm_ioplug_t,
+        name: *const ::std::os::raw::c_char,
+        stream: snd_pcm_stream_t,
+        mode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_delete(io: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_reinit_status(ioplug: *mut snd_pcm_ioplug_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_mmap_areas(
+        ioplug: *mut snd_pcm_ioplug_t,
+    ) -> *const snd_pcm_channel_area_t;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_params_reset(io: *mut snd_pcm_ioplug_t);
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_set_param_minmax(
+        io: *mut snd_pcm_ioplug_t,
+        type_: ::std::os::raw::c_int,
+        min: ::std::os::raw::c_uint,
+        max: ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_set_param_list(
+        io: *mut snd_pcm_ioplug_t,
+        type_: ::std::os::raw::c_int,
+        num_list: ::std::os::raw::c_uint,
+        list: *const ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_set_state(
+        ioplug: *mut snd_pcm_ioplug_t,
+        state: snd_pcm_state_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_avail(
+        ioplug: *const snd_pcm_ioplug_t,
+        hw_ptr: snd_pcm_uframes_t,
+        appl_ptr: snd_pcm_uframes_t,
+    ) -> snd_pcm_uframes_t;
+}
+extern "C" {
+    pub fn snd_pcm_ioplug_hw_avail(
+        ioplug: *const snd_pcm_ioplug_t,
+        hw_ptr: snd_pcm_uframes_t,
+        appl_ptr: snd_pcm_uframes_t,
+    ) -> snd_pcm_uframes_t;
+}
+#[doc = "< format"]
+pub const SND_PCM_EXTPLUG_HW_FORMAT: ::std::os::raw::c_uint = 0;
+#[doc = "< channels"]
+pub const SND_PCM_EXTPLUG_HW_CHANNELS: ::std::os::raw::c_uint = 1;
+#[doc = "< max number of hw constraints"]
+pub const SND_PCM_EXTPLUG_HW_PARAMS: ::std::os::raw::c_uint = 2;
+#[doc = " hw constraints for extplug"]
+pub type _bindgen_ty_8 = ::std::os::raw::c_uint;
+#[doc = " Handle of external filter plugin"]
+pub type snd_pcm_extplug_t = snd_pcm_extplug;
+#[doc = " Callback table of extplug"]
+pub type snd_pcm_extplug_callback_t = snd_pcm_extplug_callback;
+#[doc = " Handle of extplug"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct snd_pcm_extplug {
+    #[doc = " protocol version; #SND_PCM_EXTPLUG_VERSION must be filled here"]
+    #[doc = " before calling #snd_pcm_extplug_create()"]
+    pub version: ::std::os::raw::c_uint,
+    #[doc = " name of this plugin; must be filled before calling #snd_pcm_extplug_create()"]
+    pub name: *const ::std::os::raw::c_char,
+    #[doc = " callbacks of this plugin; must be filled before calling #snd_pcm_extplug_create()"]
+    pub callback: *const snd_pcm_extplug_callback_t,
+    #[doc = " private data, which can be used freely in the driver callbacks"]
+    pub private_data: *mut ::std::os::raw::c_void,
+    #[doc = " PCM handle filled by #snd_pcm_extplug_create()"]
+    pub pcm: *mut snd_pcm_t,
+    #[doc = " stream direction; read-only status"]
+    pub stream: snd_pcm_stream_t,
+    #[doc = " format hw parameter; filled after hw_params is caled"]
+    pub format: snd_pcm_format_t,
+    #[doc = " subformat hw parameter; filled after hw_params is caled"]
+    pub subformat: snd_pcm_subformat_t,
+    #[doc = " channels hw parameter; filled after hw_params is caled"]
+    pub channels: ::std::os::raw::c_uint,
+    #[doc = " rate hw parameter; filled after hw_params is caled"]
+    pub rate: ::std::os::raw::c_uint,
+    #[doc = " slave_format hw parameter; filled after hw_params is caled"]
+    pub slave_format: snd_pcm_format_t,
+    #[doc = " slave_subformat hw parameter; filled after hw_params is caled"]
+    pub slave_subformat: snd_pcm_subformat_t,
+    #[doc = " slave_channels hw parameter; filled after hw_params is caled"]
+    pub slave_channels: ::std::os::raw::c_uint,
+}
+#[doc = " Callback table of extplug"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct snd_pcm_extplug_callback {
+    #[doc = " transfer between source and destination; this is a required callback"]
+    pub transfer: ::std::option::Option<
+        unsafe extern "C" fn(
+            ext: *mut snd_pcm_extplug_t,
+            dst_areas: *const snd_pcm_channel_area_t,
+            dst_offset: snd_pcm_uframes_t,
+            src_areas: *const snd_pcm_channel_area_t,
+            src_offset: snd_pcm_uframes_t,
+            size: snd_pcm_uframes_t,
+        ) -> snd_pcm_sframes_t,
+    >,
+    #[doc = " close the PCM; optional"]
+    pub close: ::std::option::Option<
+        unsafe extern "C" fn(ext: *mut snd_pcm_extplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " hw_params; optional"]
+    pub hw_params: ::std::option::Option<
+        unsafe extern "C" fn(
+            ext: *mut snd_pcm_extplug_t,
+            params: *mut snd_pcm_hw_params_t,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " hw_free; optional"]
+    pub hw_free: ::std::option::Option<
+        unsafe extern "C" fn(ext: *mut snd_pcm_extplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " dump; optional"]
+    pub dump: ::std::option::Option<
+        unsafe extern "C" fn(ext: *mut snd_pcm_extplug_t, out: *mut snd_output_t),
+    >,
+    #[doc = " init; optional initialization called at prepare or reset"]
+    pub init: ::std::option::Option<
+        unsafe extern "C" fn(ext: *mut snd_pcm_extplug_t) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " query the channel maps; optional; since v1.0.2"]
+    pub query_chmaps: ::std::option::Option<
+        unsafe extern "C" fn(ext: *mut snd_pcm_extplug_t) -> *mut *mut snd_pcm_chmap_query_t,
+    >,
+    #[doc = " get the channel map; optional; since v1.0.2"]
+    pub get_chmap: ::std::option::Option<
+        unsafe extern "C" fn(ext: *mut snd_pcm_extplug_t) -> *mut snd_pcm_chmap_t,
+    >,
+    #[doc = " set the channel map; optional; since v1.0.2"]
+    pub set_chmap: ::std::option::Option<
+        unsafe extern "C" fn(
+            ext: *mut snd_pcm_extplug_t,
+            map: *const snd_pcm_chmap_t,
+        ) -> ::std::os::raw::c_int,
+    >,
+}
+extern "C" {
+    pub fn snd_pcm_extplug_create(
+        ext: *mut snd_pcm_extplug_t,
+        name: *const ::std::os::raw::c_char,
+        root: *mut snd_config_t,
+        slave_conf: *mut snd_config_t,
+        stream: snd_pcm_stream_t,
+        mode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_extplug_delete(ext: *mut snd_pcm_extplug_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_extplug_params_reset(ext: *mut snd_pcm_extplug_t);
+}
+extern "C" {
+    pub fn snd_pcm_extplug_set_param_list(
+        extplug: *mut snd_pcm_extplug_t,
+        type_: ::std::os::raw::c_int,
+        num_list: ::std::os::raw::c_uint,
+        list: *const ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_extplug_set_param_minmax(
+        extplug: *mut snd_pcm_extplug_t,
+        type_: ::std::os::raw::c_int,
+        min: ::std::os::raw::c_uint,
+        max: ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_extplug_set_slave_param_list(
+        extplug: *mut snd_pcm_extplug_t,
+        type_: ::std::os::raw::c_int,
+        num_list: ::std::os::raw::c_uint,
+        list: *const ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_extplug_set_slave_param_minmax(
+        extplug: *mut snd_pcm_extplug_t,
+        type_: ::std::os::raw::c_int,
+        min: ::std::os::raw::c_uint,
+        max: ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_extplug_set_param_link(
+        extplug: *mut snd_pcm_extplug_t,
+        type_: ::std::os::raw::c_int,
+        keep_link: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_pcm_parse_control_id(
+        conf: *mut snd_config_t,
+        ctl_id: *mut snd_ctl_elem_id_t,
+        cardp: *mut ::std::os::raw::c_int,
+        cchannelsp: *mut ::std::os::raw::c_int,
+        hwctlp: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
 }
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
