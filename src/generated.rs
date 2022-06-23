@@ -325,6 +325,12 @@ extern "C" {
     ) -> usize;
 }
 extern "C" {
+    pub fn snd_output_buffer_steal(
+        output: *mut snd_output_t,
+        buf: *mut *mut ::std::os::raw::c_char,
+    ) -> usize;
+}
+extern "C" {
     pub fn snd_output_close(output: *mut snd_output_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -455,6 +461,13 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn snd_config_load_string(
+        config: *mut *mut snd_config_t,
+        s: *const ::std::os::raw::c_char,
+        size: usize,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn snd_config_load_override(
         config: *mut snd_config_t,
         in_: *mut snd_input_t,
@@ -513,6 +526,22 @@ extern "C" {
         result: *mut *mut snd_config_t,
     ) -> ::std::os::raw::c_int;
 }
+pub type snd_config_expand_fcn_t = ::std::option::Option<
+    unsafe extern "C" fn(
+        dst: *mut *mut snd_config_t,
+        s: *const ::std::os::raw::c_char,
+        private_data: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int,
+>;
+extern "C" {
+    pub fn snd_config_expand_custom(
+        config: *mut snd_config_t,
+        root: *mut snd_config_t,
+        fcn: snd_config_expand_fcn_t,
+        private_data: *mut ::std::os::raw::c_void,
+        result: *mut *mut snd_config_t,
+    ) -> ::std::os::raw::c_int;
+}
 extern "C" {
     pub fn snd_config_expand(
         config: *mut snd_config_t,
@@ -528,6 +557,14 @@ extern "C" {
         root: *mut snd_config_t,
         private_data: *mut snd_config_t,
         result: *mut *mut snd_config_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_config_evaluate_string(
+        dst: *mut *mut snd_config_t,
+        s: *const ::std::os::raw::c_char,
+        fcn: snd_config_expand_fcn_t,
+        private_data: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -562,6 +599,19 @@ extern "C" {
     pub fn snd_config_copy(
         dst: *mut *mut snd_config_t,
         src: *mut snd_config_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_config_substitute(
+        dst: *mut snd_config_t,
+        src: *mut snd_config_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_config_merge(
+        dst: *mut snd_config_t,
+        src: *mut snd_config_t,
+        override_: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -606,6 +656,15 @@ extern "C" {
         config: *mut *mut snd_config_t,
         key: *const ::std::os::raw::c_char,
         join: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_config_make_path(
+        config: *mut *mut snd_config_t,
+        root: *mut snd_config_t,
+        key: *const ::std::os::raw::c_char,
+        join: ::std::os::raw::c_int,
+        override_: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -655,6 +714,9 @@ extern "C" {
 }
 extern "C" {
     pub fn snd_config_is_array(config: *const snd_config_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_config_is_empty(config: *const snd_config_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn snd_config_set_id(
@@ -767,6 +829,9 @@ extern "C" {
 }
 extern "C" {
     pub fn snd_config_get_bool(conf: *const snd_config_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_config_get_card(conf: *const snd_config_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn snd_config_get_ctl_iface_ascii(
@@ -3687,6 +3752,20 @@ pub const SND_RAWMIDI_TYPE_VIRTUAL: _snd_rawmidi_type = 3;
 pub type _snd_rawmidi_type = ::std::os::raw::c_uint;
 #[doc = " RawMidi type"]
 pub use self::_snd_rawmidi_type as snd_rawmidi_type_t;
+pub const SND_RAWMIDI_CLOCK_NONE: _snd_rawmidi_clock = 0;
+pub const SND_RAWMIDI_CLOCK_REALTIME: _snd_rawmidi_clock = 1;
+pub const SND_RAWMIDI_CLOCK_MONOTONIC: _snd_rawmidi_clock = 2;
+pub const SND_RAWMIDI_CLOCK_MONOTONIC_RAW: _snd_rawmidi_clock = 3;
+#[doc = " Type of clock used with rawmidi timestamp"]
+pub type _snd_rawmidi_clock = ::std::os::raw::c_uint;
+#[doc = " Type of clock used with rawmidi timestamp"]
+pub use self::_snd_rawmidi_clock as snd_rawmidi_clock_t;
+pub const SND_RAWMIDI_READ_STANDARD: _snd_rawmidi_read_mode = 0;
+pub const SND_RAWMIDI_READ_TSTAMP: _snd_rawmidi_read_mode = 1;
+#[doc = " Select the read mode (standard or with timestamps)"]
+pub type _snd_rawmidi_read_mode = ::std::os::raw::c_uint;
+#[doc = " Select the read mode (standard or with timestamps)"]
+pub use self::_snd_rawmidi_read_mode as snd_rawmidi_read_mode_t;
 extern "C" {
     pub fn snd_rawmidi_open(
         in_rmidi: *mut *mut snd_rawmidi_t,
@@ -3849,6 +3928,30 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn snd_rawmidi_params_set_read_mode(
+        rawmidi: *const snd_rawmidi_t,
+        params: *mut snd_rawmidi_params_t,
+        val: snd_rawmidi_read_mode_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_rawmidi_params_get_read_mode(
+        params: *const snd_rawmidi_params_t,
+    ) -> snd_rawmidi_read_mode_t;
+}
+extern "C" {
+    pub fn snd_rawmidi_params_set_clock_type(
+        rawmidi: *const snd_rawmidi_t,
+        params: *mut snd_rawmidi_params_t,
+        val: snd_rawmidi_clock_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_rawmidi_params_get_clock_type(
+        params: *const snd_rawmidi_params_t,
+    ) -> snd_rawmidi_clock_t;
+}
+extern "C" {
     pub fn snd_rawmidi_params(
         rmidi: *mut snd_rawmidi_t,
         params: *mut snd_rawmidi_params_t,
@@ -3909,6 +4012,14 @@ extern "C" {
 extern "C" {
     pub fn snd_rawmidi_read(
         rmidi: *mut snd_rawmidi_t,
+        buffer: *mut ::std::os::raw::c_void,
+        size: usize,
+    ) -> isize;
+}
+extern "C" {
+    pub fn snd_rawmidi_tread(
+        rmidi: *mut snd_rawmidi_t,
+        tstamp: *mut timespec,
         buffer: *mut ::std::os::raw::c_void,
         size: usize,
     ) -> isize;
@@ -4727,7 +4838,31 @@ pub type snd_aes_iec958_t = snd_aes_iec958;
 pub struct _snd_ctl_card_info {
     _unused: [u8; 0],
 }
-#[doc = " CTL card info container"]
+#[doc = " \\brief CTL card info container."]
+#[doc = ""]
+#[doc = " This type contains meta information about a sound card, such as the index,"]
+#[doc = " name, longname, etc."]
+#[doc = ""]
+#[doc = " \\par Memory management"]
+#[doc = ""]
+#[doc = " Before using a snd_ctl_card_info_t object, it must be allocated using"]
+#[doc = " snd_ctl_card_info_alloca() or snd_ctl_card_info_malloc(). When using the"]
+#[doc = " latter, it must be freed again using snd_ctl_card_info_free()."]
+#[doc = ""]
+#[doc = " A card info object can be zeroed out using snd_ctl_card_info_clear()."]
+#[doc = ""]
+#[doc = " A card info object can be copied to another one using"]
+#[doc = " snd_ctl_card_info_copy()."]
+#[doc = ""]
+#[doc = " \\par Obtaining the Information"]
+#[doc = ""]
+#[doc = " To obtain the card information, it must first be opened using"]
+#[doc = " snd_ctl_open(), and a snd_ctl_card_info_t container must be"]
+#[doc = " allocated. Then, the information can be read using"]
+#[doc = " snd_ctl_card_info_get_card()."]
+#[doc = ""]
+#[doc = " Thereafter, the card properties can be read using the"]
+#[doc = " snd_ctl_card_info_get_*() functions."]
 pub type snd_ctl_card_info_t = _snd_ctl_card_info;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -4822,7 +4957,7 @@ pub type snd_ctl_elem_info_t = _snd_ctl_elem_info;
 pub struct _snd_ctl_elem_value {
     _unused: [u8; 0],
 }
-#[doc = " CTL element value container"]
+#[doc = " CTL element value container."]
 #[doc = ""]
 #[doc = " Contains the value(s) (i.e. members) of a single element. All"]
 #[doc = " values of a given element are of the same type."]
@@ -4833,6 +4968,11 @@ pub struct _snd_ctl_elem_value {
 #[doc = " snd_ctl_elem_value_alloca() or snd_ctl_elem_value_malloc(). When"]
 #[doc = " using the latter, it must be freed again using"]
 #[doc = " snd_ctl_elem_value_free()."]
+#[doc = ""]
+#[doc = " A value object can be zeroed out using snd_ctl_elem_value_clear()."]
+#[doc = ""]
+#[doc = " A value object can be copied to another one using"]
+#[doc = " snd_ctl_elem_value_copy()."]
 #[doc = ""]
 #[doc = " \\par Identifier"]
 #[doc = ""]
@@ -4932,6 +5072,8 @@ pub const SND_CTL_TYPE_SHM: _snd_ctl_type = 1;
 pub const SND_CTL_TYPE_INET: _snd_ctl_type = 2;
 #[doc = " External control plugin"]
 pub const SND_CTL_TYPE_EXT: _snd_ctl_type = 3;
+#[doc = " Control functionality remapping"]
+pub const SND_CTL_TYPE_REMAP: _snd_ctl_type = 4;
 #[doc = " CTL type"]
 pub type _snd_ctl_type = ::std::os::raw::c_uint;
 #[doc = " CTL type"]
@@ -5273,6 +5415,18 @@ extern "C" {
     pub fn snd_ctl_elem_id_copy(dst: *mut snd_ctl_elem_id_t, src: *const snd_ctl_elem_id_t);
 }
 extern "C" {
+    pub fn snd_ctl_elem_id_compare_numid(
+        id1: *const snd_ctl_elem_id_t,
+        id2: *const snd_ctl_elem_id_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn snd_ctl_elem_id_compare_set(
+        id1: *const snd_ctl_elem_id_t,
+        id2: *const snd_ctl_elem_id_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn snd_ctl_elem_id_get_numid(obj: *const snd_ctl_elem_id_t) -> ::std::os::raw::c_uint;
 }
 extern "C" {
@@ -5612,6 +5766,26 @@ extern "C" {
 }
 extern "C" {
     pub fn snd_ctl_elem_info_set_index(obj: *mut snd_ctl_elem_info_t, val: ::std::os::raw::c_uint);
+}
+extern "C" {
+    pub fn snd_ctl_elem_info_set_read_write(
+        obj: *mut snd_ctl_elem_info_t,
+        rval: ::std::os::raw::c_int,
+        wval: ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    pub fn snd_ctl_elem_info_set_tlv_read_write(
+        obj: *mut snd_ctl_elem_info_t,
+        rval: ::std::os::raw::c_int,
+        wval: ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    pub fn snd_ctl_elem_info_set_inactive(
+        obj: *mut snd_ctl_elem_info_t,
+        val: ::std::os::raw::c_int,
+    );
 }
 extern "C" {
     pub fn snd_ctl_add_integer_elem_set(
